@@ -15,6 +15,16 @@ class DuplicateInterviewRoundError(frappe.ValidationError):
 	pass
 
 
+PIPELINE_STAGES = [
+	"Screening",
+	"Technical Round 1",
+	"Technical Round 2",
+	"HR Round",
+	"Offered",
+	"Rejected",
+]
+
+
 class Interview(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -36,6 +46,14 @@ class Interview(Document):
 		interview_type: DF.Link
 		job_applicant: DF.Link
 		job_opening: DF.Link | None
+		pipeline_stage: DF.Literal[
+			"Screening",
+			"Technical Round 1",
+			"Technical Round 2",
+			"HR Round",
+			"Offered",
+			"Rejected",
+		]
 		reminded: DF.Check
 		resume_link: DF.Data | None
 		scheduled_on: DF.Date
@@ -46,6 +64,21 @@ class Interview(Document):
 	def validate(self):
 		self.validate_duplicate_interview()
 		self.validate_designation()
+
+	def on_update(self):
+		self.sync_job_applicant_pipeline_stage()
+
+	def sync_job_applicant_pipeline_stage(self):
+		if not self.job_applicant:
+			return
+
+		latest_stage = frappe.db.get_value(
+			"Interview",
+			{"job_applicant": self.job_applicant, "docstatus": ["!=", 2]},
+			"pipeline_stage",
+			order_by="scheduled_on desc, creation desc",
+		)
+		frappe.db.set_value("Job Applicant", self.job_applicant, "pipeline_stage", latest_stage)
 
 	def on_submit(self):
 		if self.status not in ["Cleared", "Rejected"]:
@@ -158,6 +191,59 @@ class Interview(Document):
 def get_interviewers(interview_type: str) -> list[dict]:
 	frappe.has_permission("Interview Type", "read", interview_type, throw=True)
 	return frappe.get_all("Interviewer", filters={"parent": interview_type}, fields=["user as interviewer"])
+
+
+@frappe.whitelist(methods=["POST"])
+def update_pipeline_stage(applicant_id: str, stage: str) -> dict:
+	"""Update the latest active Interview stage for a Job Applicant."""
+	if stage not in PIPELINE_STAGES:
+		frappe.throw(
+			_("Stage must be one of: {0}").format(", ".join(PIPELINE_STAGES)),
+			exc=frappe.ValidationError,
+		)
+
+	frappe.has_permission("Job Applicant", ptype="write", throw=True)
+	if not frappe.db.exists("Job Applicant", applicant_id):
+		frappe.throw(_("Job Applicant {0} does not exist.").format(applicant_id), exc=frappe.DoesNotExistError)
+	frappe.has_permission("Job Applicant", ptype="write", doc=applicant_id, throw=True)
+
+	interviews = frappe.get_all(
+		"Interview",
+		filters={"job_applicant": applicant_id, "docstatus": ["!=", 2]},
+		fields=["name"],
+		order_by="scheduled_on desc, creation desc",
+		limit_page_length=1,
+	)
+	if not interviews:
+		frappe.throw(_("No active Interview exists for Job Applicant {0}.").format(applicant_id))
+
+	interview_name = interviews[0].name
+	frappe.has_permission("Interview", ptype="write", doc=interview_name, throw=True)
+	interview = frappe.get_doc("Interview", interview_name)
+	interview.pipeline_stage = stage
+	interview.save()
+	return {"applicant_id": applicant_id, "interview": interview.name, "pipeline_stage": stage}
+
+
+@frappe.whitelist()
+def get_pipeline_stage_counts(for_date: str | None = None) -> list[dict]:
+	"""Count distinct applicants by Interview pipeline stage for a date (today by default)."""
+	frappe.has_permission("Interview", ptype="read", throw=True)
+	frappe.has_permission("Job Applicant", ptype="read", throw=True)
+	counts = frappe.db.sql(
+		"""
+		SELECT pipeline_stage, COUNT(DISTINCT job_applicant) AS applicant_count
+		FROM `tabInterview`
+		WHERE scheduled_on = %(for_date)s
+			AND docstatus != 2
+			AND IFNULL(pipeline_stage, '') != ''
+		GROUP BY pipeline_stage
+		""",
+		{"for_date": getdate(for_date)},
+		as_dict=True,
+	)
+	count_by_stage = {row.pipeline_stage: row.applicant_count for row in counts}
+	return [{"stage": stage, "count": count_by_stage.get(stage, 0)} for stage in PIPELINE_STAGES]
 
 
 def get_recipients(name, for_feedback=0):

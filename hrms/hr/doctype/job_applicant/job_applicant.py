@@ -41,6 +41,14 @@ class JobApplicant(Document):
 		lower_range: DF.Currency
 		notes: DF.Data | None
 		phone_number: DF.Data | None
+		pipeline_stage: DF.Literal[
+			"Screening",
+			"Technical Round 1",
+			"Technical Round 2",
+			"HR Round",
+			"Offered",
+			"Rejected",
+		] | None
 		resume_attachment: DF.Attach | None
 		resume_link: DF.Data | None
 		source: DF.Link | None

@@ -130,7 +130,9 @@ const todayCounts = createResource({
 const isLoading = computed(() => applicants.loading || todayCounts.loading)
 
 function applicantsForStage(stage) {
-	return (applicants.data || []).filter((applicant) => (applicant.pipeline_stage || stages[0]) === stage)
+	return (applicants.data || []).filter(
+		(applicant) => (applicant.pipeline_stage || stages[0]) === stage
+	)
 }
 
 function countForStage(stage) {
@@ -165,7 +167,8 @@ async function saveStage(applicant, currentStage) {
 		delete draftStages.value[applicant.name]
 		await reloadData()
 	} catch (error) {
-		pageError.value = error?.messages?.[0] || error?.message || __("Could not update the pipeline stage.")
+		pageError.value =
+			error?.messages?.[0] || error?.message || __("Could not update the pipeline stage.")
 	} finally {
 		savingApplicant.value = ""
 	}

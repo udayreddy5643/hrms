@@ -1,0 +1,35 @@
+.hrms-pipeline-stage {
+	border-radius: 999px;
+	display: inline-flex;
+	font-size: var(--text-xs);
+	font-weight: 600;
+	line-height: 1.25;
+	max-width: 100%;
+	padding: 0.25rem 0.55rem;
+	white-space: nowrap;
+}
+
+.hrms-pipeline-stage--gray {
+	background-color: var(--bg-gray);
+	color: var(--text-color);
+}
+
+.hrms-pipeline-stage--blue {
+	background-color: var(--bg-blue);
+	color: var(--text-on-blue);
+}
+
+.hrms-pipeline-stage--orange {
+	background-color: var(--bg-orange);
+	color: var(--text-on-orange);
+}
+
+.hrms-pipeline-stage--green {
+	background-color: var(--bg-green);
+	color: var(--text-on-green);
+}
+
+.hrms-pipeline-stage--red {
+	background-color: var(--bg-red);
+	color: var(--text-on-red);
+}

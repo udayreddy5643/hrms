@@ -1,13 +1,15 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
 
+from unittest.mock import MagicMock, patch
+
 import frappe
 from frappe.utils import nowdate
 
 from erpnext.setup.doctype.employee.test_employee import make_employee
 
 from hrms.hr.doctype.interview.test_interview import create_interview_type
-from hrms.hr.doctype.job_applicant.job_applicant import create_interview
+from hrms.hr.doctype.job_applicant.job_applicant import create_interview, generate_resume_summary
 from hrms.hr.doctype.job_applicant.job_applicant import make_employee as map_applicant_to_employee
 from hrms.hr.doctype.job_offer.test_job_offer import create_job_offer
 from hrms.hr.doctype.job_opening.test_job_opening import get_job_opening
@@ -16,6 +18,47 @@ from hrms.tests.utils import HRMSTestSuite, make_user
 
 
 class TestJobApplicant(HRMSTestSuite):
+	def test_generate_resume_summary_uses_openrouter_fallback(self):
+		applicant = MagicMock(cover_letter="Experienced Python developer", resume_attachment=None)
+		provider_responses = [RuntimeError("Groq unavailable"), "Summary from OpenRouter"]
+		with (
+			patch("hrms.hr.doctype.job_applicant.job_applicant.frappe.has_permission"),
+			patch("hrms.hr.doctype.job_applicant.job_applicant.frappe.get_doc", return_value=applicant),
+			patch(
+				"hrms.hr.doctype.job_applicant.job_applicant.frappe.conf.get",
+				side_effect=lambda key: {"groq_api_key": "groq-test", "openrouter_api_key": "router-test"}.get(key),
+			),
+			patch(
+				"hrms.hr.doctype.job_applicant.job_applicant._request_resume_summary",
+				side_effect=provider_responses,
+			) as request_summary,
+		):
+			result = generate_resume_summary("applicant@example.com")
+
+		self.assertEqual(result, "Summary from OpenRouter")
+		self.assertEqual(applicant.ai_resume_summary, result)
+		applicant.save.assert_called_once_with(ignore_permissions=True)
+		self.assertEqual(request_summary.call_args_list[1].args[2], "meta-llama/llama-3.3-70b-instruct")
+
+	def test_generate_resume_summary_reports_both_providers_failed(self):
+		applicant = MagicMock(cover_letter="Resume text", resume_attachment=None)
+		with (
+			patch("hrms.hr.doctype.job_applicant.job_applicant.frappe.has_permission"),
+			patch("hrms.hr.doctype.job_applicant.job_applicant.frappe.get_doc", return_value=applicant),
+			patch(
+				"hrms.hr.doctype.job_applicant.job_applicant.frappe.conf.get",
+				side_effect=lambda key: {"groq_api_key": "groq-test", "openrouter_api_key": "router-test"}.get(key),
+			),
+			patch(
+				"hrms.hr.doctype.job_applicant.job_applicant._request_resume_summary",
+				side_effect=RuntimeError("provider unavailable"),
+			),
+		):
+			with self.assertRaises(frappe.ValidationError):
+				generate_resume_summary("applicant@example.com")
+
+		applicant.save.assert_not_called()
+
 	def test_onload_filters_out_cancelled_job_offer(self):
 		applicant = create_job_applicant()
 		job_offer = create_job_offer(job_applicant=applicant.name)

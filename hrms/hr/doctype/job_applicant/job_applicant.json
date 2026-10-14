@@ -29,6 +29,7 @@
   "open_resume_button",
   "cover_letter",
   "resume_attachment",
+  "ai_resume_summary",
   "notes",
   "source_and_rating_section",
   "source",
@@ -117,6 +118,12 @@
    "fieldname": "resume_attachment",
    "fieldtype": "Attach",
    "label": "Attachment"
+  },
+  {
+   "fieldname": "ai_resume_summary",
+   "fieldtype": "Long Text",
+   "label": "AI Resume Summary",
+   "read_only": 1
   },
   {
    "fieldname": "notes",

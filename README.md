@@ -62,4 +62,4 @@ Please read our [Logo and Trademark Policy](TRADEMARK_POLICY.md).
 
 Guide: [DEPLOYMENT.md](DEPLOYMENT.md)
 
-Live instance: https://angelic-nature-production-390e.up.railway.app
+Deployment status: Railway marks the service active, but its generated domains currently return Railway 404. The Frappe login page is not verified; see [DEPLOYMENT.md](DEPLOYMENT.md) for details.

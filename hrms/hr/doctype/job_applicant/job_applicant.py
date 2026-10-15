@@ -187,13 +187,13 @@ def generate_resume_summary(applicant_id: str) -> str:
 	providers = [
 		(
 			"https://api.groq.com/openai/v1/chat/completions",
-			frappe.conf.get("groq_api_key"),
-			"llama-3.3-70b-versatile",
+			(frappe.conf.get("groq_api_key") or "").strip(),
+			"openai/gpt-oss-120b",
 			"Groq",
 		),
 		(
 			"https://openrouter.ai/api/v1/chat/completions",
-			frappe.conf.get("openrouter_api_key"),
+			(frappe.conf.get("openrouter_api_key") or "").strip(),
 			"meta-llama/llama-3.3-70b-instruct",
 			"OpenRouter",
 		),

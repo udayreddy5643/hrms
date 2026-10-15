@@ -1,21 +1,30 @@
 # Railway Deployment
 
-## Platform and URL
+## Current status (15 October 2026)
+
+Railway reports the Frappe service deployment as active and successful. The two generated public domains currently return Railway's 404 "domain does not exist" page, so the Frappe login page is not verified and this is not yet a working public demo.
+
+- https://angelic-nature-production-390e.up.railway.app
+- https://angelic-nature-production-a044.up.railway.app
+
+## Configuration
 
 - Platform: Railway
 - Application: Frappe HRMS (ERPNext/Frappe v16)
-- Deployment URL: https://angelic-nature-production-390e.up.railway.app
-- Railway service: angelic-nature, production environment
-- Source: this repository's feat/cynaris-w2d5-uday-b branch, built with the Railway Docker setup in udayreddy5643/frappe_railway.
+- Project/environment: angelic-nature / production
+- Source repository: udayreddy5643/hrms, branch feat/cynaris-w2d5-uday-b
+- Build repository: udayreddy5643/frappe_railway
+- Service root: frappe (uses frappe/Dockerfile)
+- Public HTTP port: 8000
 
 ## Deployment setup
 
-1. Create a Railway project and connect the GitHub repository.
-2. Set the service root to frappe so Railway uses frappe/Dockerfile.
-3. Configure a MariaDB service and a Redis service in the same Railway project.
-4. Add the application service variables listed below, using Railway private service hostnames and references for database and Redis credentials. Do not commit secret values.
-5. Deploy the service and wait for the image build, database initialization, app installation, and health check to complete.
-6. Open the generated Railway domain and confirm the Frappe login page loads.
+1. Connect the GitHub repository to Railway and select the feature branch.
+2. Set the service root directory to frappe.
+3. Configure MariaDB and Redis services in the same Railway project.
+4. Add the application variables below with Railway private service references. Keep secret values out of Git.
+5. Deploy and wait for image build, database initialization, app installation, and startup checks.
+6. In the app service's Settings > Networking, confirm a generated domain is mapped to port 8000 and test that URL for the Frappe login page.
 
 ## Required environment variable names
 
@@ -26,13 +35,10 @@
 - ADMIN_PASSWORD
 - SITE_NAME (defaults to frontend)
 - FRAPPE_SITE_NAME_HEADER (defaults to SITE_NAME)
-- FRAPPE_APPS (the build configuration selects the HRMS feature branch)
+- FRAPPE_APPS
 
 Use Railway-generated values for credentials and private hosts. Never put database, Redis, administrator, or AI provider secrets in Git.
 
-## Known issues and verification
+## Known issue and next check
 
-- The first deploy can take several minutes while assets are built and the site is initialized.
-- The startup script must parse an authenticated REDIS_URL before passing its host to wait-for-it; the startup dependency check was fixed to remove URL credentials from that host argument while preserving the complete URL in Frappe Redis configuration.
-- The first deployment attempt returned 502 while Redis readiness checking failed. A new build containing the startup fix is in progress; verify that Railway marks it active and that the generated URL shows the login page before treating the deployment as complete.
-- Local Docker setup is separate and is not required for Railway runtime.
+The latest Railway deployment is marked active, but both assigned domains return a Railway 404 before the Frappe app loads. Check the domain entry and port mapping under the service's Networking settings, then retry the generated domain. Until it displays the Frappe login page, deployment is not verified. Local Docker is separate from the Railway runtime.

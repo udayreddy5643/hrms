@@ -15,8 +15,10 @@ from erpnext.setup.doctype.employee.test_employee import make_employee
 from hrms.hr.doctype.interview.interview import (
 	DuplicateInterviewRoundError,
 	get_feedback,
+	get_pipeline_stage_counts,
 	get_skill_wise_average_rating,
 	update_job_applicant_status,
+	update_pipeline_stage,
 )
 from hrms.hr.doctype.job_applicant.job_applicant import get_interview_details
 from hrms.tests.test_utils import create_job_applicant, get_email_by_subject
@@ -24,6 +26,36 @@ from hrms.tests.utils import HRMSTestSuite
 
 
 class TestInterview(HRMSTestSuite):
+	def test_update_pipeline_stage_updates_latest_interview_and_applicant(self):
+		applicant = create_job_applicant()
+		interview = create_interview_and_dependencies(applicant.name)
+
+		result = update_pipeline_stage(applicant.name, "Technical Round 1")
+
+		self.assertEqual(result["interview"], interview.name)
+		self.assertEqual(frappe.db.get_value("Interview", interview.name, "pipeline_stage"), "Technical Round 1")
+		self.assertEqual(frappe.db.get_value("Job Applicant", applicant.name, "pipeline_stage"), "Technical Round 1")
+
+	def test_update_pipeline_stage_rejects_unknown_stage(self):
+		applicant = create_job_applicant()
+		create_interview_and_dependencies(applicant.name)
+
+		with self.assertRaises(frappe.ValidationError):
+			update_pipeline_stage(applicant.name, "Phone Screen")
+
+	def test_pipeline_stage_counts_for_date(self):
+		test_date = "2099-12-31"
+		applicant = create_job_applicant()
+		create_interview_and_dependencies(
+			applicant.name, scheduled_on=test_date, status="Pending"
+		)
+		update_pipeline_stage(applicant.name, "HR Round")
+
+		counts = get_pipeline_stage_counts(test_date)
+		count_by_stage = {row["stage"]: row["count"] for row in counts}
+		self.assertEqual(count_by_stage["HR Round"], 1)
+		self.assertEqual(count_by_stage["Offered"], 0)
+
 	def test_validations_for_designation(self):
 		job_applicant = create_job_applicant()
 		interview = create_interview_and_dependencies(

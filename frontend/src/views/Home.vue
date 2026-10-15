@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import { inject, markRaw } from "vue"
+import { computed, inject, markRaw } from "vue"
 
 import CheckInPanel from "@/components/CheckInPanel.vue"
 import QuickLinks from "@/components/QuickLinks.vue"
@@ -23,39 +23,56 @@ import LeaveIcon from "@/components/icons/LeaveIcon.vue"
 import ExpenseIcon from "@/components/icons/ExpenseIcon.vue"
 import EmployeeAdvanceIcon from "@/components/icons/EmployeeAdvanceIcon.vue"
 import SalaryIcon from "@/components/icons/SalaryIcon.vue"
+import InterviewPipelineIcon from "@/components/icons/InterviewPipelineIcon.vue"
+import { userResource } from "@/data/user"
 
 const __ = inject("$translate")
 
-const quickLinks = [
-	{
-		icon: markRaw(AttendanceIcon),
-		title: __("Request Attendance"),
-		route: "AttendanceRequestFormView",
-	},
-	{
-		icon: markRaw(ShiftIcon),
-		title: __("Request a Shift"),
-		route: "ShiftRequestFormView",
-	},
-	{
-		icon: markRaw(LeaveIcon),
-		title: __("Request Leave"),
-		route: "LeaveApplicationFormView",
-	},
-	{
-		icon: markRaw(ExpenseIcon),
-		title: __("Claim an Expense"),
-		route: "ExpenseClaimFormView",
-	},
-	{
-		icon: markRaw(EmployeeAdvanceIcon),
-		title: __("Request an Advance"),
-		route: "EmployeeAdvanceFormView",
-	},
-	{
-		icon: markRaw(SalaryIcon),
-		title: __("View Salary Slips"),
-		route: "SalarySlipsDashboard",
-	},
-]
+const quickLinks = computed(() => {
+	const links = [
+		{
+			icon: markRaw(AttendanceIcon),
+			title: __("Request Attendance"),
+			route: "AttendanceRequestFormView",
+		},
+		{
+			icon: markRaw(ShiftIcon),
+			title: __("Request a Shift"),
+			route: "ShiftRequestFormView",
+		},
+		{
+			icon: markRaw(LeaveIcon),
+			title: __("Request Leave"),
+			route: "LeaveApplicationFormView",
+		},
+		{
+			icon: markRaw(ExpenseIcon),
+			title: __("Claim an Expense"),
+			route: "ExpenseClaimFormView",
+		},
+		{
+			icon: markRaw(EmployeeAdvanceIcon),
+			title: __("Request an Advance"),
+			route: "EmployeeAdvanceFormView",
+		},
+		{
+			icon: markRaw(SalaryIcon),
+			title: __("View Salary Slips"),
+			route: "SalarySlipsDashboard",
+		},
+	]
+
+	const canReviewInterviews = userResource.data?.roles?.some((role) =>
+		["HR Manager", "HR User"].includes(role)
+	)
+	if (canReviewInterviews) {
+		links.push({
+			icon: markRaw(InterviewPipelineIcon),
+			title: __("Interview Pipeline"),
+			route: "InterviewPipeline",
+		})
+	}
+
+	return links
+})
 </script>

@@ -2,7 +2,7 @@
 // MIT License. See license.txt
 
 frappe.listview_settings["Job Applicant"] = {
-	add_fields: ["status", "applicant_rating", "designation"],
+	add_fields: ["status", "pipeline_stage", "applicant_rating", "designation"],
 
 	onload: function () {
 		patch_kanban_dialog_for_job_applicant();
@@ -18,6 +18,23 @@ frappe.listview_settings["Job Applicant"] = {
 		} else if (["Hold", "Rejected"].includes(doc.status)) {
 			return [__(doc.status), "red", "status,=," + doc.status];
 		}
+	},
+
+	formatters: {
+		pipeline_stage(value) {
+			if (!value) return "";
+
+			const stage_tone = {
+				Screening: "gray",
+				"Technical Round 1": "blue",
+				"Technical Round 2": "blue",
+				"HR Round": "orange",
+				Offered: "green",
+				Rejected: "red",
+			}[value] || "gray";
+
+			return `<span class="hrms-pipeline-stage hrms-pipeline-stage--${stage_tone}">${frappe.utils.escape_html(__(value))}</span>`;
+		},
 	},
 };
 

@@ -73,60 +73,54 @@ It takes care of installation, setup, upgrades, monitoring, maintenance and supp
 	</a>
 </div>
 
-
 ## Development setup
 ### Docker
 You need Docker, docker-compose and git setup on your machine. Refer [Docker documentation](https://docs.docker.com/). After that, run the following commands:
-```
-git clone https://github.com/frappe/hrms
-cd hrms/docker
-docker-compose up
-```
 
-Wait for some time until the setup script creates a site. After that you can access `http://localhost:8000` in your browser and the login screen for HR should show up.
+    git clone https://github.com/frappe/hrms
+    cd hrms/docker
+    docker-compose up
+
+Wait for some time until the setup script creates a site. After that you can access http://localhost:8000 in your browser and the login screen for HR should show up.
 
 Use the following credentials to log in:
 
-- Username: `Administrator`
-- Password: `admin`
+- Username: Administrator
+- Password: admin
 
 ### Local
 
 1. Set up bench by following the [Installation Steps](https://frappeframework.com/docs/user/en/installation) and start the server and keep it running
-	```sh
-	$ bench start
-	```
+
+    $ bench start
+
 2. In a separate terminal window, run the following commands
-	```sh
-	$ bench new-site hrms.localhost
-	$ bench get-app erpnext
-	$ bench get-app hrms
-	$ bench --site hrms.localhost install-app hrms
-	$ bench --site hrms.localhost add-to-hosts
-	```
-3. You can access the site at `http://hrms.localhost:8080`
+
+    $ bench new-site hrms.localhost
+    $ bench get-app erpnext
+    $ bench get-app hrms
+    $ bench --site hrms.localhost install-app hrms
+    $ bench --site hrms.localhost add-to-hosts
+
+3. You can access the site at http://hrms.localhost:8080
 
 ## Learning and Community
 
 1. [Frappe School](https://frappe.school) - Learn Frappe Framework and ERPNext from the various courses by the maintainers or from the community.
 2. [Documentation](https://docs.frappe.io/hr) - Extensive documentation for Frappe HR.
-3. [User Forum](https://discuss.erpnext.com/) - Engage with the community of ERPNext users and service providers.
+3. [User Forum](https://discuss.erpnext.com/) - Engage with a community of ERPNext users and service providers.
 4. [Telegram Group](https://t.me/frappehr) - Get instant help from the community of users.
-
 
 ## Contributing
 
 1. [Issue Guidelines](https://github.com/frappe/erpnext/wiki/Issue-Guidelines)
-1. [Report Security Vulnerabilities](https://erpnext.com/security)
-1. [Pull Request Requirements](https://github.com/frappe/erpnext/wiki/Contribution-Guidelines)
-
+2. [Report Security Vulnerabilities](https://erpnext.com/security)
+3. [Pull Request Requirements](https://github.com/frappe/erpnext/wiki/Contribution-Guidelines)
 
 ## Logo and Trademark Policy
 
 Please read our [Logo and Trademark Policy](TRADEMARK_POLICY.md).
 
-<br />
-<br />
 <div align="center" style="padding-top: 0.75rem;">
 	<a href="https://frappe.io" target="_blank">
 		<picture>
@@ -136,3 +130,6 @@ Please read our [Logo and Trademark Policy](TRADEMARK_POLICY.md).
 	</a>
 </div>
 
+## Week 2 project deployment
+
+This fork includes interview pipeline and AI resume summary lesson work. The Railway service is active, but the configured generated domains currently return a Railway 404, so the application is not verified as a live demo. See [DEPLOYMENT.md](DEPLOYMENT.md) for configuration and current status.

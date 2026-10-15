@@ -65,6 +65,30 @@ frappe.ui.form.on("Job Applicant", {
 	},
 	create_custom_buttons: function (frm) {
 		if (!frm.doc.__islocal) {
+			frm.add_custom_button(__("Generate AI Summary"), () => {
+				frappe.call({
+					method: "hrms.hr.doctype.job_applicant.job_applicant.generate_resume_summary",
+					args: { applicant_id: frm.doc.name },
+					freeze: true,
+					freeze_message: __("Generating resume summary..."),
+					callback: (r) => {
+						if (r.message) {
+							frm.set_value("ai_resume_summary", r.message);
+							frappe.show_alert({
+								message: __("AI resume summary generated"),
+								indicator: "green",
+							});
+						}
+					},
+					error: () => {
+						frappe.msgprint({
+							title: __("Summary unavailable"),
+							message: __("Could not generate the summary. Check the AI provider settings and try again."),
+							indicator: "red",
+						});
+					},
+				});
+			});
 			if (frm.doc.status == "Open") {
 				frm.add_custom_button(__("Shortlist"), () => {
 					frm.set_value("status", "Shortlisted");

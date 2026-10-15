@@ -12,19 +12,20 @@ Railway reports the Frappe service deployment as active and successful. The two 
 - Platform: Railway
 - Application: Frappe HRMS (ERPNext/Frappe v16)
 - Project/environment: angelic-nature / production
-- Source repository: udayreddy5643/hrms, branch feat/cynaris-w2d5-uday-b
-- Build repository: udayreddy5643/frappe_railway
-- Service root: frappe (uses frappe/Dockerfile)
+- Railway source repository: udayreddy5643/frappe_railway, branch main
+- Root directory: /frappe
+- Dockerfile: frappe/Dockerfile
+- Application code repository: udayreddy5643/hrms, branch feat/cynaris-w2d5-uday-b (lesson work; this is not the repository currently connected to Railway)
 - Public HTTP port: 8000
 
 ## Deployment setup
 
-1. Connect the GitHub repository to Railway and select the feature branch.
-2. Set the service root directory to frappe.
+1. Connect the Railway service to the deployment repository and branch shown above.
+2. Set the root directory to /frappe and build from frappe/Dockerfile.
 3. Configure MariaDB and Redis services in the same Railway project.
 4. Add the application variables below with Railway private service references. Keep secret values out of Git.
 5. Deploy and wait for image build, database initialization, app installation, and startup checks.
-6. In the app service's Settings > Networking, confirm a generated domain is mapped to port 8000 and test that URL for the Frappe login page.
+6. In the app service's Settings > Networking, confirm a generated domain targets port 8000 and test it for the Frappe login page.
 
 ## Required environment variable names
 
@@ -41,4 +42,4 @@ Use Railway-generated values for credentials and private hosts. Never put databa
 
 ## Known issue and next check
 
-The latest Railway deployment is marked active, but both assigned domains return a Railway 404 before the Frappe app loads. Check the domain entry and port mapping under the service's Networking settings, then retry the generated domain. Until it displays the Frappe login page, deployment is not verified. Local Docker is separate from the Railway runtime.
+The latest Railway deployment is marked active, and its domains are configured for port 8000, but both domains return a Railway 404 before the Frappe app loads. Verify the generated domain assignment in Networking or regenerate the public domain, then retry. Until it displays the Frappe login page, deployment is not verified. Local Docker is separate from the Railway runtime.

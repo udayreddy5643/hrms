@@ -477,13 +477,10 @@ def get_interviewer_list(
 		["Has Role", "parenttype", "=", "User"],
 	]
 
-	if filters and isinstance(filters, list):
-		filters.extend(filters)
-
 	return frappe.get_all(
 		"Has Role",
 		limit_start=start,
-		limit_page_length=page_len,
+		limit=page_len,
 		filters=filters,
 		fields=["parent"],
 		as_list=1,
